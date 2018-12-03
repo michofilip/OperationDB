@@ -54,36 +54,32 @@ public class XMLFileParser {
     }
 
     private static Operation parseElement(Element element) throws ParseException {
-        try {
-            String execDateStr = element.getElementsByTagName("exec-date").item(0).getTextContent();
-            String orderDateStr = element.getElementsByTagName("order-date").item(0).getTextContent();
-            String type = element.getElementsByTagName("type").item(0).getTextContent();
-            String description = element.getElementsByTagName("description").item(0).getTextContent();
-            String amountStr = element.getElementsByTagName("amount").item(0).getTextContent();
-            String amountCurr = element.getElementsByTagName("amount").item(0).getAttributes().getNamedItem("curr").getTextContent();
-            String endingBalanceStr = element.getElementsByTagName("ending-balance").item(0).getTextContent();
-            String endingBalanceCurr = element.getElementsByTagName("ending-balance").item(0).getAttributes().getNamedItem("curr").getTextContent();
+        String execDateStr = getTextContentOfElement(element, "exec-date");
+        String orderDateStr = getTextContentOfElement(element, "order-date");
+        String type = getTextContentOfElement(element, "type");
+        String description = getTextContentOfElement(element, "description");
+        String amountStr = getTextContentOfElement(element, "amount");
+        String amountCurr = getTextContentOfElementAttribute(element, "amount", "curr");
+        String endingBalanceStr = getTextContentOfElement(element, "ending-balance");
+        String endingBalanceCurr = getTextContentOfElementAttribute(element, "ending-balance", "curr");
 
-            LocalDate execDate = parseLocalDate(execDateStr);
-            LocalDate orderDate = parseLocalDate(orderDateStr);
+        LocalDate execDate = parseLocalDate(execDateStr);
+        LocalDate orderDate = parseLocalDate(orderDateStr);
 
-            BigDecimal amount = parseBigDecimal(amountStr);
-            BigDecimal endingBalance = parseBigDecimal(endingBalanceStr);
+        BigDecimal amount = parseBigDecimal(amountStr);
+        BigDecimal endingBalance = parseBigDecimal(endingBalanceStr);
 
-            Operation operation = new Operation();
-            operation.setExecDate(execDate);
-            operation.setOrderDate(orderDate);
-            operation.setType(type);
-            operation.setDescription(description);
-            operation.setAmount(amount);
-            operation.setAmountCurr(amountCurr);
-            operation.setEndingBalance(endingBalance);
-            operation.setEndingBalanceCurr(endingBalanceCurr);
+        Operation operation = new Operation();
+        operation.setExecDate(execDate);
+        operation.setOrderDate(orderDate);
+        operation.setType(type);
+        operation.setDescription(description);
+        operation.setAmount(amount);
+        operation.setAmountCurr(amountCurr);
+        operation.setEndingBalance(endingBalance);
+        operation.setEndingBalanceCurr(endingBalanceCurr);
 
-            return operation;
-        } catch (NullPointerException e) {
-            throw new ParseException();
-        }
+        return operation;
     }
 
     private static LocalDate parseLocalDate(String dateStr) throws ParseException {
@@ -104,6 +100,29 @@ public class XMLFileParser {
         try {
             return new BigDecimal(bigDecimalStr);
         } catch (NumberFormatException e) {
+            throw new ParseException();
+        }
+    }
+
+    private static String getTextContentOfElement(Element element, String elementName) throws ParseException {
+        NodeList nodes = element.getElementsByTagName(elementName);
+        if (nodes.getLength() > 0) {
+            return nodes.item(0).getTextContent();
+        } else {
+            throw new ParseException();
+        }
+    }
+
+    private static String getTextContentOfElementAttribute(Element element, String elementName, String attributeName) throws ParseException {
+        NodeList nodes = element.getElementsByTagName(elementName);
+        if (nodes.getLength() > 0) {
+            Node attribute = nodes.item(0).getAttributes().getNamedItem(attributeName);
+            if (attribute != null) {
+                return attribute.getTextContent();
+            } else {
+                throw new ParseException();
+            }
+        } else {
             throw new ParseException();
         }
     }
