@@ -42,14 +42,12 @@ public class XMLFileParser {
                     try {
                         Operation operation = parseElement(element);
                         operations.add(operation);
-                    } catch (ParseException e) {
-//                        e.printStackTrace();
+                    } catch (ParseException ignored) {
                     }
                 }
             }
 
-        } catch (SAXException | ParserConfigurationException | IOException e) {
-//            e.printStackTrace();
+        } catch (SAXException | ParserConfigurationException | IOException ignored) {
         }
 
         return operations;
@@ -66,30 +64,13 @@ public class XMLFileParser {
             String endingBalanceStr = element.getElementsByTagName("ending-balance").item(0).getTextContent();
             String endingBalanceCurr = element.getElementsByTagName("ending-balance").item(0).getAttributes().getNamedItem("curr").getTextContent();
 
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-            if (execDateStr == null || orderDateStr == null) {
-                throw new ParseException();
-            }
-            LocalDate execDate;
-            LocalDate orderDate;
-            try {
-                execDate = LocalDate.parse(execDateStr, formatter);
-                orderDate = LocalDate.parse(orderDateStr, formatter);
-            } catch (DateTimeParseException e) {
-                throw new ParseException();
-            }
+            LocalDate execDate = parseLocalDate(execDateStr);
+            LocalDate orderDate = parseLocalDate(orderDateStr);
 
-            BigDecimal amount;
-            BigDecimal endingBalance;
-            try {
-                amount = new BigDecimal(amountStr);
-                endingBalance = new BigDecimal(endingBalanceStr);
-            } catch (NumberFormatException e) {
-                throw new ParseException();
-            }
+            BigDecimal amount = parseBigDecimal(amountStr);
+            BigDecimal endingBalance = parseBigDecimal(endingBalanceStr);
 
             Operation operation = new Operation();
-
             operation.setExecDate(execDate);
             operation.setOrderDate(orderDate);
             operation.setType(type);
@@ -104,4 +85,28 @@ public class XMLFileParser {
             throw new ParseException();
         }
     }
+
+    private static LocalDate parseLocalDate(String dateStr) throws ParseException {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+        if (dateStr == null) {
+            throw new ParseException();
+        }
+
+        try {
+            return LocalDate.parse(dateStr, formatter);
+        } catch (DateTimeParseException e) {
+            throw new ParseException();
+        }
+    }
+
+    private static BigDecimal parseBigDecimal(String bigDecimalStr) throws ParseException {
+        try {
+            return new BigDecimal(bigDecimalStr);
+        } catch (NumberFormatException e) {
+            throw new ParseException();
+        }
+    }
+
+
 }
