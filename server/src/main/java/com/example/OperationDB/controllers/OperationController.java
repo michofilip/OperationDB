@@ -15,7 +15,7 @@ public class OperationController {
 
     private OperationService operationService;
 
-    @GetMapping("/")
+    @GetMapping
     public Collection<Operation> getAll() {
         return operationService.findAll();
     }
@@ -25,7 +25,7 @@ public class OperationController {
         return operationService.findOne(id);
     }
 
-    @PostMapping("/")
+    @PostMapping
     public void createFromFile(MultipartFile file) {
         operationService.saveFromXMLFile(file);
     }
