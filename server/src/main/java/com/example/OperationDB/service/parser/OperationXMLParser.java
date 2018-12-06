@@ -11,7 +11,10 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -19,15 +22,22 @@ import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class XMLFileParser {
+public class OperationXMLParser {
+    public static List<Operation> parse(File file) throws IOException {
+        return parse(new FileInputStream(file));
+    }
 
-    public static List<Operation> parseFromXMLFile(MultipartFile file) {
+    public static List<Operation> parse(MultipartFile file) throws IOException {
+        return parse(file.getInputStream());
+    }
+
+    public static List<Operation> parse(InputStream inputStream) throws IOException {
         List<Operation> operations = new ArrayList<>();
 
         try {
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-            Document doc = dBuilder.parse(file.getInputStream());
+            Document doc = dBuilder.parse(inputStream);
 
             doc.getDocumentElement().normalize();
 
@@ -47,7 +57,7 @@ public class XMLFileParser {
                 }
             }
 
-        } catch (SAXException | ParserConfigurationException | IOException ignored) {
+        } catch (SAXException | ParserConfigurationException ignored) {
         }
 
         return operations;
